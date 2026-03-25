@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using BlogSite.Data;
 using BlogSite.Models;
 
-namespace BlogSite.Pages.Posts
+namespace BlogSite.Pages_Categories
 {
     public class DetailsModel : PageModel
     {
@@ -19,8 +19,7 @@ namespace BlogSite.Pages.Posts
             _context = context;
         }
 
-        public Post Post { get; set; } = default!;
-        public List<Post> RelatedPosts { get; set; } = new();
+        public Category Category { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -29,14 +28,11 @@ namespace BlogSite.Pages.Posts
                 return NotFound();
             }
 
-            var post = await _context.Posts.Include(p => p.Author).Include(p => p.Category).FirstOrDefaultAsync(m => m.Id == id);
+            var category = await _context.Categories.Include(c => c.Posts).ThenInclude(p => p.Author).FirstOrDefaultAsync(m => m.Id == id);
 
-            if (post is not null)
+            if (category is not null)
             {
-                Post = post;
-                RelatedPosts = await _context.Posts
-                    .Where(p => p.CategoryId == post.CategoryId && p.Id != post.Id)
-                    .ToListAsync();
+                Category = category;
 
                 return Page();
             }
